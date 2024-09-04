@@ -16,10 +16,10 @@ const Home = () => {
   }, [router.isReady, router.query]);
 
   useEffect(()=>{
-    if(AppId!="default-app-id"){
+    if(appId!="default-app-id"){
       setX(2);
     }
-  },[AppId,router.isReady, router.quer])
+  },[appId,router.isReady, router.quer])
 
   console.log("appId", appId);
 
