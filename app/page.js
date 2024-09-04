@@ -1,20 +1,25 @@
 // frontend/pages/index.js
-'use client'
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ChatWindow from './components/ChatWindow';
-import { useRouter,useSearchParams  } from 'next/navigation';
 
 const Home = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const appId = searchParams.get("appId")|| "default-app-id";
-  console.log("appId",appId); 
-  // const appId = router.query.appId || "default-app-id";// Replace with dynamic appId as needed
+  const [appId, setAppId] = useState("default-app-id");
+
+  useEffect(() => {
+    if (router.isReady) {
+      const { appId } = router.query;
+      setAppId(appId || "default-app-id");
+    }
+  }, [router.isReady, router.query]);
+
+  console.log("appId", appId);
 
   return (
     <div>
       <h1>Welcome to Chat Plugin local {appId}</h1>
-
       <ChatWindow appId={appId} />
     </div>
   );
