@@ -2,28 +2,36 @@
 import React, { useState, useEffect } from 'react';
 import socket from '../utils/socket';
 
-const ChatWindow = ({ appId }) => {
+const ChatWindow = ({ appId,roomId,user }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-
+  const finalroom = appId+roomId;
   useEffect(() => {
-    socket.emit('join', { appId });
-
+    socket.emit('join', { finalroom });
+    console.log("aaaaa", finalroom);
     socket.on('message', (newMessage) => {
+      console.log("mmmmm",newMessage);
       setMessages((prevMessages) => [newMessage, ...prevMessages]);
+    });
+    socket.on('messageHistory', (history) => {
+      setMessages(history);
     });
 
     return () => {
       socket.off('message');
+      socket.off('messageHistory');
     };
-  }, [appId]);
+  }, [appId, roomId,finalroom]);
 
   const sendMessage = () => {
     if (message.trim()) {
-      socket.emit('message', { appId, message });
+      socket.emit('message', { appId,finalroom, user,message });
       setMessage('');
     }
   };
+  useEffect(()=>{
+    console.log("messsages", messages);
+  },[messages])
 
   return (
     <div className="chat-window">
