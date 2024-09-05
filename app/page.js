@@ -1,32 +1,26 @@
-// frontend/pages/index.js
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import ChatWindow from './components/ChatWindow';
+import { useRouter } from 'next/router'; // Update the import
+import ChatWindow from '../components/ChatWindow'; // Correct the import path
 
 const Home = () => {
   const router = useRouter();
   const [appId, setAppId] = useState("default-app-id");
-  const [x,setX]= useState(0)
+
   useEffect(() => {
     if (router.isReady) {
-      const { appId } = router.query;
-      setAppId(appId || "default-app-id");
+      const appIdFromUrl = router.query?.appId; // Use optional chaining
+      console.log("AppId from URL:", appIdFromUrl);  
+      setAppId(appIdFromUrl || "default-app-id");
     }
   }, [router.isReady, router.query]);
 
-  useEffect(()=>{
-    if(appId!="default-app-id"){
-      setX(2);
-    }
-  },[appId,router.isReady, router.quer])
-
-  console.log("appId", appId);
+  console.log("AppId being used:", appId);
 
   return (
     <div>
-      <h1>Welcome to Chat Plugin local {x}</h1>
-      <ChatWindow appId={appId} />
+      <h1>Welcome to Chat Plugin, AppId: {appId}</h1>
+      <ChatWindow appId={appId} /> {/* Pass appId to ChatWindow */}
     </div>
   );
 };
