@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router'; // Update the import
-import ChatWindow from '../components/ChatWindow'; // Correct the import path
+import ChatWindow from './components/ChatWindow'; // Correct the import path
 
 const Home = () => {
   const router = useRouter();
