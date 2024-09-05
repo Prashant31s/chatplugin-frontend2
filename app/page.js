@@ -7,11 +7,17 @@ import ChatWindow from './components/ChatWindow'; // Adjust the path if needed
 const Home = () => {
   const searchParams = useSearchParams();
   const [appId, setAppId] = useState('default-app-id');
+  const [roomId,setRoomId]= useState('room');
+  const [user,setUser]= useState('user');
 
   useEffect(() => {
     const appIdFromUrl = searchParams.get('appId');
+    const roomIdFromUrl=searchParams.get('roomId');
+    const userFromUrl= searchParams.get('user');
     if (appIdFromUrl) {
       setAppId(appIdFromUrl);
+      setRoomId(roomIdFromUrl);
+      setUser(userFromUrl);
     }
   }, [searchParams]);
 
@@ -20,7 +26,7 @@ const Home = () => {
   return (
     <div>
       <h1>Welcome to Chat Plugin, AppId: {appId}</h1>
-      <ChatWindow appId={appId} />
+      <ChatWindow appId={appId} roomId={roomId} user={user}/>
     </div>
   );
 };
