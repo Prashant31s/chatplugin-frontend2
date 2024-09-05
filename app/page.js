@@ -1,19 +1,18 @@
-'use client';
+'use client';  // This indicates the use of the App Router
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router'; // Update the import
-import ChatWindow from './components/ChatWindow'; // Correct the import path
+import { useSearchParams } from 'next/navigation';  // Use this for query params in App Router
+import ChatWindow from './components/ChatWindow';
 
 const Home = () => {
-  const router = useRouter();
-  const [appId, setAppId] = useState("default-app-id");
+  const searchParams = useSearchParams();  // New way to get query parameters in App Router
+  const [appId, setAppId] = useState('default-app-id');
 
   useEffect(() => {
-    if (router.isReady) {
-      const appIdFromUrl = router.query?.appId; // Use optional chaining
-      console.log("AppId from URL:", appIdFromUrl);  
-      setAppId(appIdFromUrl || "default-app-id");
+    const appIdFromUrl = searchParams.get('appId');  // Fetch appId from the URL query
+    if (appIdFromUrl) {
+      setAppId(appIdFromUrl);
     }
-  }, [router.isReady, router.query]);
+  }, [searchParams]);
 
   console.log("AppId being used:", appId);
 
