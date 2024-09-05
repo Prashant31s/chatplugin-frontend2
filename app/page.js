@@ -1,14 +1,15 @@
-'use client';  // This indicates the use of the App Router
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';  // Use this for query params in App Router
-import ChatWindow from './components/ChatWindow';
+'use client';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import ChatWindow from '../components/ChatWindow'; // Adjust the path if needed
 
+// Main Home component
 const Home = () => {
-  const searchParams = useSearchParams();  // New way to get query parameters in App Router
+  const searchParams = useSearchParams();
   const [appId, setAppId] = useState('default-app-id');
 
   useEffect(() => {
-    const appIdFromUrl = searchParams.get('appId');  // Fetch appId from the URL query
+    const appIdFromUrl = searchParams.get('appId');
     if (appIdFromUrl) {
       setAppId(appIdFromUrl);
     }
@@ -19,9 +20,19 @@ const Home = () => {
   return (
     <div>
       <h1>Welcome to Chat Plugin, AppId: {appId}</h1>
-      <ChatWindow appId={appId} /> {/* Pass appId to ChatWindow */}
+      <ChatWindow appId={appId} />
     </div>
   );
 };
 
-export default Home;
+// Fallback UI while loading
+const LoadingFallback = () => <div>Loading chat...</div>;
+
+// Wrapping Home component with Suspense in HomePage
+export default function HomePage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <Home />
+    </Suspense>
+  );
+}
