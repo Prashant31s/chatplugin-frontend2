@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import ChatWindow from '../components/ChatWindow'; // Adjust the path if needed
+import ChatWindow from './components/ChatWindow'; // Adjust the path if needed
 
 // Main Home component
 const Home = () => {
