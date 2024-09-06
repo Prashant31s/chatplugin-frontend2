@@ -16,20 +16,6 @@ const ChatWindow = ({ appId,roomId,user }) => {
     setMessage("");
   };
 
-  const handleEdit = (messageId, currentContent) => {
-    //triggers when message edit button is clicked
-    const newContent = prompt("Edit your message:", currentContent);
-    if (newContent) {
-      socket.emit("edit-message", { messageId, newContent, room: room });
-    }
-    setActiveDropdown(null);
-  };
-
-  const handleDelete = (messageId) => {
-    //triggers when message delete button is clicked
-    socket.emit("delete-message", { messageId, room: room });
-    setActiveDropdown(null);
-  };
 
   useEffect(() => {
     socket.emit("join-room", finalroom);
@@ -43,7 +29,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
       setData(mes);
       console.log("daaaaata", messages);
     });
-  }, []);
+  }, [appId,finalroom]);
 
   useEffect(() => {
  
