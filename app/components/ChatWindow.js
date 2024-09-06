@@ -16,6 +16,20 @@ const ChatWindow = ({ appId,roomId,user }) => {
     setMessage("");
   };
 
+  const handleEdit = (messageId, currentContent) => {
+    //triggers when message edit button is clicked
+    const newContent = prompt("Edit your message:", currentContent);
+    if (newContent) {
+      socket.emit("edit-message", { messageId, newContent, room: room });
+    }
+    setActiveDropdown(null);
+  };
+
+  const handleDelete = (messageId) => {
+    //triggers when message delete button is clicked
+    socket.emit("delete-message", { messageId, room: room });
+    setActiveDropdown(null);
+  };
 
   useEffect(() => {
     socket.emit("join-room", finalroom);
@@ -29,7 +43,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
       setData(mes);
       console.log("daaaaata", messages);
     });
-  }, [appId,finalroom]);
+  }, []);
 
   useEffect(() => {
  
@@ -56,15 +70,15 @@ const ChatWindow = ({ appId,roomId,user }) => {
 
   return (
     // <div className="w-screen bg-accent h-100%">
-      <div className="rounded-2xl items-center justify-center text-center text-2xl h-screen w-auto ">
-        <div className="flex flex-col justify-end border-[2.5px] border-white rounded-[30px] bg-black   mx-auto  bg-background  h-[100%]">
+      <div className="rounded-2xl items-center justify-center text-center text-2xl h-screen w-auto">
+        <div className="flex flex-col justify-end border-[2.5px] border-white  bg-black  bg-background  h-[100%]">
           <div className="flex flex-col-reverse p-3 mt-5 mr-2 overflow-auto scrollbar-thin scrollbar-thumb-rounded-sm scrollbar-thumb-black">
-            <div className="flex flex-col gap-3 p-2">
+            <div className="flex flex-col gap-3 p-2 w-[100%]">
               {data.map((msg, index) =>
                 msg.ruser === user ? (
                   <div
                     key={index}
-                    className="relative bg-joinbutton flex flex-row self-end max-w-xs border-[1px] border-black rounded-[25px] p-1"
+                    className="relative bg-joinbutton flex flex-row self-end max-w-[80%] border-[1px] border-black rounded-[25px] p-1"
                   >
                     <p className="text-wrap m-1 word overflow-x-auto">
                       {msg.nmessages}
@@ -73,7 +87,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
                 ) : (
                   <div
                     key={index}
-                    className="bg-secondary flex flex-col max-w-xs border-[1px] border-text rounded-[25px] w-fit"
+                    className="bg-secondary flex flex-col max-w-[80%] border-[1px] border-text rounded-[25px] w-fit"
                   >
                     {msg.ruser === data[index - 1 > 0 ? index - 1 : 0].ruser && //functionality to not give every message with user if the last message is from same user
                     index != 0 ? (
