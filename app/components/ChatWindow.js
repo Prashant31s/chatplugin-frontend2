@@ -70,8 +70,8 @@ const ChatWindow = ({ appId,roomId,user }) => {
 
   return (
     // <div className="w-screen bg-accent h-100%">
-      <div className="rounded-2xl items-center justify-center text-center text-2xl h-screen w-[100%]">
-        <div className="flex flex-col justify-end border-[2.5px] border-white rounded-[30px] bg-black  min-w-[750px]  mx-auto  bg-background w-[100%] h-[100%]">
+      <div className="rounded-2xl items-center justify-center text-center text-2xl h-screen ">
+        <div className="flex flex-col justify-end border-[2.5px] border-white rounded-[30px] bg-black  min-w-[750px]  mx-auto  bg-background  h-[100%]">
           <div className="flex flex-col-reverse p-3 mt-5 mr-2 overflow-auto scrollbar-thin scrollbar-thumb-rounded-sm scrollbar-thumb-black">
             <div className="flex flex-col gap-3 p-2">
               {data.map((msg, index) =>
