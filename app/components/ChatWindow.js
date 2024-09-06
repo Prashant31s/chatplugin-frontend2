@@ -43,7 +43,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
       setData(mes);
       console.log("daaaaata", messages);
     });
-  }, []);
+  }, [appId,fianlroom]);
 
   useEffect(() => {
  
