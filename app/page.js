@@ -25,7 +25,7 @@ const Home = () => {
 
   return (
     <div>
-      <h1>Welcome to Chat Plugin, AppId: {appId}</h1>
+     
       <ChatWindow appId={appId} roomId={roomId} user={user}/>
     </div>
   );
