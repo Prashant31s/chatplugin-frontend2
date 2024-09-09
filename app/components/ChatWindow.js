@@ -495,7 +495,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
                           {msg.user} :
                         </span>
                         <span className=" mb-[2px] pl-1 pr-1 pb-1 text-black rounded-xl text-wrap word overflow-x-auto word ">
-                        renderMessage{msg.message}
+                          {renderMessage(msg.message)}
                         </span>
                       </div>
                     )}
