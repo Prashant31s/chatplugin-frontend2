@@ -49,7 +49,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
       setData(mes);
       //console.log("daaaaata", messages);
     });
-  }, []);
+  }, [appId,user]);
 
   useEffect(() => {
  
