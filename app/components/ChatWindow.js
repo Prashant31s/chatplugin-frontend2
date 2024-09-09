@@ -473,14 +473,14 @@ const ChatWindow = ({ appId,roomId,user }) => {
                     key={index}
                     className="relative bg-joinbutton flex flex-row self-end max-w-[80%] border-[1px] border-black rounded-[25px] p-1"
                   >
-                    <p className="text-wrap m-1 word overflow-x-auto word">
+                    <p className="text-wrap m-2 word overflow-x-auto word">
                     {renderMessage(msg.message)}
                     </p>
                   </div>
                 ) : (
                   <div
                     key={index}
-                    className="bg-secondary flex flex-col max-w-[80%] border-[1px] border-text rounded-[25px] w-fit"
+                    className="bg-secondary flex flex-col max-w-[80%] border-[1px] border-text rounded-[25px] w-fit p-1"
                   >
                     {msg.user === data[index - 1 > 0 ? index - 1 : 0].user && //functionality to not give every message with user if the last message is from same user
                     index != 0 ? (
