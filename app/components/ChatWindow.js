@@ -613,7 +613,7 @@ const chatbox =()=>{
         )}
       </div>
         ):(
-          <button onClick={chatbox} className="w-[12%] h-[8%] rounded-full bg-joinbutton2 absolute bottom-[3%] right-[2%] items-center hover:w-[15%] hover:h-[10%] ">
+          <button onClick={chatbox} className="w-[12%] h-[8%] rounded-full bg-joinbutton2 absolute bottom-[3%] right-[3%] items-center hover:w-[15%] hover:h-[10%] ">
             <img src ="https://www.svgrepo.com/show/529480/chat-round-line.svg"  className="  mx-auto h-[70%] invert"></img>
           </button>
           
