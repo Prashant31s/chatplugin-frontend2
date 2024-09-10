@@ -55,7 +55,7 @@
 }
 
 /* Send message button */
-.form button {
+/* .form button {
   padding: 1.75%;
   margin-left: 0.8%;
   margin-bottom: 0.6%;
@@ -69,7 +69,7 @@
   color: #000;
   cursor: pointer;
   transition: background-color 0.2s ease;
-}
+} */
 
 .word {
   white-space: pre-wrap; /* Preserves whitespace and line breaks */
@@ -82,9 +82,9 @@
   word-wrap: break-word; /* Breaks long words if necessary */
   white-space: break-spaces;
 }
-.form button:hover {
+/* .form button:hover {
   background-color: #9d174d;
-}
+} */
 
 .word {
   word-wrap: break-word;
