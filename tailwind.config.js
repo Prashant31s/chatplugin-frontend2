@@ -13,12 +13,12 @@ module.exports = {
     'text': '#0d080b',
     'text2':'#FFFFFF',
     'background': '#faf6f8',
-    'primary': '#b18bb0',
+    'primary': '#002244',
     'secondary': '#a1a1aa',
-    'accent': '#b69d8b',
+    'accent': '#002244',
     'heading':'#000000',
-    'joinbutton':'#3b82f6',
-    'joinbutton2':'#1e40af'
+    'joinbutton':'#87CEFA',
+    'joinbutton2':'#002D62'
      },
     extend: {},
   },
