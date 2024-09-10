@@ -555,7 +555,7 @@ const chatbox =()=>{
                 overflowWrap: "break-word",
                 overflowY: "auto",
                 maxHeight: "150px",
-                padding:"0px 5px 0px 10px" ,// Adjust the max height to fit your needs
+                // Adjust the max height to fit your needs
               }}
             />
             <label htmlFor="fileInput" className="cursor-pointer h-[100%]  w-[10%]">
