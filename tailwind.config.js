@@ -14,7 +14,7 @@ module.exports = {
     'text2':'#FFFFFF',
     'background': '#faf6f8',
     'primary': '#002244',
-    'secondary': '#a1a1aa',
+    'secondary': '#D0D0D0',
     'accent': '#002244',
     'heading':'#000000',
     'joinbutton':'#87CEFA',
