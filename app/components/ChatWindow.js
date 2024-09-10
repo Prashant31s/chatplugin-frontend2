@@ -471,11 +471,11 @@ const chatbox =()=>{
       {
         chatboxopen ?(
           <div className="rounded-2xl  h-screen w-auto p-[2%] ">
-            <div  className="flex flex-row h-[5%] bg-primary">
+            <div  className="flex flex-row h-[5%] bg-primary rounded-t-lg">
               <div className="w-[90%] h-[100%]"></div>
               <button onClick={chatbox} className=" w-[10%] h-[100%] "><img src="https://www.svgrepo.com/show/80301/cross.svg"  alt = "close icon"  className = "h-[80%] w-[90%]  invert"></img></button>
             </div>
-        <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%]">
+        <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg">
           
           <div className="flex flex-col-reverse p-3 mt-5 mr-2 overflow-auto scrollbar-thin scrollbar-thumb-rounded-sm scrollbar-thumb-black">
             <div className="flex flex-col gap-3 p-2 w-[100%]">
