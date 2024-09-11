@@ -497,7 +497,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
               ></img>
             </button>
           </div>
-          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg">
+          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg shadow-md">
             <div className="flex flex-col-reverse p-3 mt-5 mr-2 overflow-auto custom-scrollbar mb-1">
               <div className="flex flex-col gap-3 p-2 w-[100%]">
                 {data.map((msg, index) =>
@@ -539,7 +539,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="bg-background flex  flex-row  p-1 h-[100%] rounded-b-lg">
+              <div className="bg-background flex  flex-row  p-1 h-[100%] rounded-b-lg shadow-md">
                 <input
                   type="file"
                   multiple
