@@ -34,17 +34,17 @@
 }
 
 /* Message input form */
-.form {
+/* .form {
   display: flex;
   padding: 0.5%;
   box-sizing: border-box;
-}
+} */
 
 /* message input */
-.input {
-  flex: 1;
+/* .input {
+  flex: 1; */
   /* box-sizing: border-box; */
-  align-items: center;
+  /* align-items: center;
   vertical-align: middle;
   
   padding-left: 3%;
@@ -52,8 +52,8 @@
   font-size: 1rem;
   margin: 2%;
   border: 2px solid;
-  border-radius: 25px;
-}
+  border-radius: 25px; */
+/* } */
 
 /* Send message button */
 /* .form button {
@@ -118,3 +118,28 @@
  
 
 
+.custom-scrollbar {
+  /* Width of the scrollbar */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #888 #f0f0f0; /* For Firefox */
+}
+ 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+  height: 8px; /* Height of the scrollbar (horizontal scrollbar) */
+}
+ 
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounding of the scrollbar thumb */
+}
+ 
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: #f0f0f0; /* Background color of the track */
+  border-radius: 10px; /* Rounding of the track */
+}
+ 
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: transparent; /* No arrows, just the corner */
+}
+ 
