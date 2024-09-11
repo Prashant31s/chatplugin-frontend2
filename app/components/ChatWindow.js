@@ -486,10 +486,10 @@ const ChatWindow = ({ appId, roomId, user }) => {
     // <div className="w-screen bg-accent h-100%">
     <div>
       {chatboxopen ? (
-        <div className="rounded-2xl  h-screen w-auto p-[2%] ">
-          <div className="flex flex-row h-[5%] bg-primary rounded-t-lg py-[1%]">
+        <div className="rounded-lg  h-screen w-auto p-[2%] shadow-md">
+          <div className="flex flex-row h-[5%] bg-primary rounded-t-lg py-[1%] shadow-md">
             <div className="w-[95%] h-[100%]"></div>
-            <button onClick={chatbox} className=" w-[10%] h-[100%] ">
+            <button onClick={chatbox} className=" w-[10%] h-[100%]  shadow-md">
               <img
                 src="https://www.svgrepo.com/show/80301/cross.svg"
                 alt="close icon"
@@ -497,14 +497,14 @@ const ChatWindow = ({ appId, roomId, user }) => {
               ></img>
             </button>
           </div>
-          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg shadow-md">
-            <div className="flex flex-col-reverse p-3 mt-5 mr-2 overflow-auto custom-scrollbar mb-1">
-              <div className="flex flex-col gap-3 p-2 w-[100%]">
+          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg shadow-md p-2">
+            <div className="flex   overflow-auto custom-scrollbar  ">
+              <div className="flex flex-col gap-3  w-[100%] pr-0">
                 {data.map((msg, index) =>
                   msg.user === user ? (
                     <div
                       key={index}
-                      className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1 hover:bg-senderhover shadow-lg "
+                      className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1  "
                     >
                       <p className="text-wrap m-2 word overflow-x-auto word">
                         {renderMessage(msg.message)}
@@ -513,7 +513,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
                   ) : (
                     <div
                       key={index}
-                      className="bg-receiver flex flex-col max-w-[80%]   rounded-[5px] w-fit p-1 hover:bg-receiverhover shadow-lg"
+                      className="bg-receiver flex flex-col max-w-[80%]   rounded-[5px] w-fit  "
                     >
                       {msg.user === data[index - 1 > 0 ? index - 1 : 0].user && //functionality to not give every message with user if the last message is from same user
                       index != 0 ? (
@@ -523,7 +523,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
                       ) : (
                         <div className="flex flex-col">
                           <span
-                            className={`pt-1 pl-1 pr-1  mt-0 text-[20px] font-bold text-black `}
+                            className={`pt-1 pl-1 pr-1  mt-0 text-[15px] font-semibold text-black `}
                           >
                             {msg.user} :
                           </span>
@@ -538,54 +538,57 @@ const ChatWindow = ({ appId, roomId, user }) => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="bg-background flex  flex-row  p-1 h-[100%] rounded-b-lg shadow-md">
-                <input
-                  type="file"
-                  multiple
-                  id="fileInput"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <div
-                  ref={contentEditableRef}
-                  contentEditable
-                  onInput={handleContentChange}
-                  onDrop={handleDrop}
-                  onPaste={handlePaste}
-                  onKeyDown={handleKeyDown}
-                  onDragOver={handleDragOver}
-                  className="flex-grow bg-white border rounded-[25px] px-4 py-2 overflow-y-auto rounded-r-none border-r-0 "
-                  placeholder="Type your message..."
-                  style={{
-                    whiteSpace: "break-spaces",
-                    overflowWrap: "break-word",
-                    overflowY: "auto",
-                    maxHeight: "100px",
-                    
-                    Width: "80%",
-                    maxWidth: "80%",
-                  }}
-                />
-                <div className="h-[100%] w-[20%] flex flex-col justify-end">
-                  <div className="flex flex-row w-full">
-                    <label
-                      htmlFor="fileInput"
-                      className="cursor-pointer w-[50%]  h-[100%] border px-1 py-1 border-x-0"
-                    >
-                      <img
-                        src="https://www.svgrepo.com/show/457374/attachment.svg"
-                        alt="Attachment"
-                        className="h-[100%] w-[100%]"
-                      />
-                    </label>
-                    <button className="w-[50%] pl-0 pr-0 h-[100%] border rounded-r-full px-2 py-1 border-l-0 ">
-                      <img
-                        src="https://www.svgrepo.com/show/309946/send.svg"
-                        alt="Send"
-                        className="h-[80%] w-[800%]"
-                      />
-                    </button>
+            <form onSubmit={handleSubmit} className="">
+              <div className="bg-background flex  flex-row   py-2 h-[100%] rounded-b-lg  ">
+                <div className="bg-receiverhover  flex flex-row rounded-[10px] w-[100%] h-[100%] ">
+                  <input
+                    type="file"
+                    multiple
+                    id="fileInput"
+                    onChange={handleImageChange}
+                    className="hidden bg-receiverhover"
+                  />
+                  <div
+                    ref={contentEditableRef}
+                    contentEditable
+                    onInput={handleContentChange}
+                    onDrop={handleDrop}
+                    onPaste={handlePaste}
+                    onKeyDown={handleKeyDown}
+                    onDragOver={handleDragOver}
+                    className="flex-grow bg-white  rounded-[10px] py-1 px-2 overflow-y-auto custom-scrollbar  bg-receiverhover  "
+                    placeholder="Type your message..."
+                    style={{
+                      whiteSpace: "break-spaces",
+                      overflowWrap: "break-word",
+                      overflowY: "auto",
+                      maxHeight: "100px",
+                     
+                      width: "80%",
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "#888 #f0f0f0",
+                    }}
+                  />
+                  <div className="h-[100%] w-[20%] flex flex-col justify-center ">
+                    <div className="flex flex-row w-full">
+                      <label
+                        htmlFor="fileInput"
+                        className="cursor-pointer w-[50%]  h-[100%]  px-1 py-1 border-x-0"
+                      >
+                        <img
+                          src="https://www.svgrepo.com/show/457374/attachment.svg"
+                          alt="Attachment"
+                          className="h-[100%] w-[100%]"
+                        />
+                      </label>
+                      <button className="w-[50%] pl-0 pr-0 h-[100%]  rounded-r-full px-2 py-1 border-l-0 ">
+                        <img
+                          src="https://www.svgrepo.com/show/309946/send.svg"
+                          alt="Send"
+                          className="h-[80%] w-[800%]"
+                        />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
