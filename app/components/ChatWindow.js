@@ -555,14 +555,14 @@ const ChatWindow = ({ appId, roomId, user }) => {
                   onPaste={handlePaste}
                   onKeyDown={handleKeyDown}
                   onDragOver={handleDragOver}
-                  className="flex-grow bg-white border rounded-[25px] px-4 py-2 overflow-y-auto rounded-r-none "
+                  className="flex-grow bg-white border rounded-[25px] px-4 py-2 overflow-y-auto rounded-r-none border-r-0 "
                   placeholder="Type your message..."
                   style={{
                     whiteSpace: "break-spaces",
                     overflowWrap: "break-word",
                     overflowY: "auto",
                     maxHeight: "100px",
-                    border: "solid 1px black",
+                    
                     Width: "80%",
                     maxWidth: "80%",
                   }}
@@ -571,19 +571,19 @@ const ChatWindow = ({ appId, roomId, user }) => {
                   <div className="flex flex-row w-full">
                     <label
                       htmlFor="fileInput"
-                      className="cursor-pointer w-[50%] pr-0 pl-0 h-[100%] border px-2 py-1 border-l-0"
+                      className="cursor-pointer w-[50%]  h-[100%] border px-1 py-1 border-x-0"
                     >
                       <img
-                        src="https://www.svgrepo.com/show/490988/attachment.svg"
+                        src="https://www.svgrepo.com/show/457374/attachment.svg"
                         alt="Attachment"
                         className="h-[100%] w-[100%]"
                       />
                     </label>
-                    <button className="w-[50%] pl-0 pr-0 h-[100%] border rounded-r-full px-2 py-1 border-l-0">
+                    <button className="w-[50%] pl-0 pr-0 h-[100%] border rounded-r-full px-2 py-1 border-l-0 ">
                       <img
-                        src="https://www.svgrepo.com/show/533310/send-alt-1.svg"
+                        src="https://www.svgrepo.com/show/309946/send.svg"
                         alt="Send"
-                        className="h-[100%] w-[100%]"
+                        className="h-[80%] w-[800%]"
                       />
                     </button>
                   </div>
