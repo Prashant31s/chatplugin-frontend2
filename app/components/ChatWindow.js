@@ -539,7 +539,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="bg-background flex  flex-row  p-1 h-[100%]">
+              <div className="bg-background flex  flex-row  p-1 h-[100%] rounded-b-lg">
                 <input
                   type="file"
                   multiple
