@@ -1,10 +1,10 @@
 // frontend/components/ChatWindow.js
-import React, { useState, useEffect,useRef } from 'react';
-import socket from '../utils/socket';
-const ChatWindow = ({ appId,roomId,user }) => {
+import React, { useState, useEffect, useRef } from "react";
+import socket from "../utils/socket";
+const ChatWindow = ({ appId, roomId, user }) => {
   const [data, setData] = useState([]);
   const [message, setMessage] = useState("");
-  const finalroom = appId+roomId;
+  const finalroom = appId + roomId;
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const [images, setImages] = useState([]);
@@ -29,13 +29,11 @@ const ChatWindow = ({ appId,roomId,user }) => {
   //   setMessage("");
   // };
   useEffect(() => {
-    console.log("1")
+    console.log("1");
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    console.log("Mobile", isMobile)
+    console.log("Mobile", isMobile);
     setMaxZoom(isMobile ? 10 : 2);
   }, []);
-
-  
 
   useEffect(() => {
     socket.emit("join-room", finalroom);
@@ -49,15 +47,14 @@ const ChatWindow = ({ appId,roomId,user }) => {
       setData(mes);
       //console.log("daaaaata", messages);
     });
-  }, [appId,user]);
+  }, [appId, user]);
 
   useEffect(() => {
- 
-    socket.on("receive-message", ( newMessage ) => {
+    socket.on("receive-message", (newMessage) => {
       //console.log("newm", newMessage);
       setData((prevData) => [
         ...prevData,
-        {  message: newMessage.message, user: newMessage.user }, //adds the message received in state
+        { message: newMessage.message, user: newMessage.user }, //adds the message received in state
       ]);
     });
 
@@ -66,70 +63,77 @@ const ChatWindow = ({ appId,roomId,user }) => {
     };
   }, [data]);
 
-  useEffect(() => {                      // Centers the image when it is viewed and adjusts the position on window resize.
-    console.log("3")
+  useEffect(() => {
+    // Centers the image when it is viewed and adjusts the position on window resize.
+    console.log("3");
     if (viewingImage) {
       const handleResize = () => {
-        console.log("chalaaa")
-        if (imageRef.current) {                // check if the image element is available
+        console.log("chalaaa");
+        if (imageRef.current) {
+          // check if the image element is available
           // imgRect will be an object containing properties like width and height.
-          const imgRect = imageRef.current.getBoundingClientRect();  //getBoundingClientRect() provides the size of the image and its position relative to the viewport.
+          const imgRect = imageRef.current.getBoundingClientRect(); //getBoundingClientRect() provides the size of the image and its position relative to the viewport.
           const viewportWidth = window.innerWidth;
           const viewportHeight = window.innerHeight;
           const imgWidth = imgRect.width;
           const imgHeight = imgRect.height;
-          console.log("check", viewportWidth, viewportHeight)
-          console.log("check2", imgWidth, imgHeight)
-          console.log("container pos x, y", (viewportWidth - imgWidth) / 2, (viewportHeight - imgHeight) / 2)
-          console.log("container pos x, y", (viewportWidth - imgWidth), (viewportHeight - imgHeight))
-          setImagePosition({                        // Calculate initial position to center the image
+          console.log("check", viewportWidth, viewportHeight);
+          console.log("check2", imgWidth, imgHeight);
+          console.log(
+            "container pos x, y",
+            (viewportWidth - imgWidth) / 2,
+            (viewportHeight - imgHeight) / 2
+          );
+          console.log(
+            "container pos x, y",
+            viewportWidth - imgWidth,
+            viewportHeight - imgHeight
+          );
+          setImagePosition({
+            // Calculate initial position to center the image
             x: (viewportWidth - imgWidth) / 2,
-            y: (viewportHeight - imgHeight) / 2
+            y: (viewportHeight - imgHeight) / 2,
           });
-      
         }
       };
       handleResize();
-      window.addEventListener('resize', handleResize);
+      window.addEventListener("resize", handleResize);
       return () => {
-        window.removeEventListener('resize', handleResize);
+        window.removeEventListener("resize", handleResize);
       };
     }
   }, [viewingImage]);
 
-
-
-
   useEffect(() => {
-    console.log("4")
+    console.log("4");
     const handleScroll = (e) => {
       if (viewingImage) {
         e.preventDefault();
-        const zoomChange = e.deltaY < 0 ? 1.1 : 0.9;  // for virtical scroll direction if scroll up increase by 1.1 zoom in and scroll sown with 0.9 zoom out
-        setZoom(prevZoom => {
+        const zoomChange = e.deltaY < 0 ? 1.1 : 0.9; // for virtical scroll direction if scroll up increase by 1.1 zoom in and scroll sown with 0.9 zoom out
+        setZoom((prevZoom) => {
           const newZoom = Math.max(1, Math.min(prevZoom * zoomChange, maxZoom)); // prevzoom is current zoom level it will not go below 1 and above the maxZoom
           return newZoom;
         });
       }
     };
 
-    window.addEventListener('wheel', handleScroll);  // calls the handlescroll when the wheel is moved
+    window.addEventListener("wheel", handleScroll); // calls the handlescroll when the wheel is moved
     return () => {
-      window.removeEventListener('wheel', handleScroll);
+      window.removeEventListener("wheel", handleScroll);
     };
   }, [viewingImage, maxZoom]);
-  
+
   useEffect(() => {
     // Add global event listeners
     // window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  
+    window.addEventListener("mouseup", handleMouseUp);
+
     // Cleanup function to remove event listeners
     return () => {
       // window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isHolding, imageDragging]); 
+  }, [isHolding, imageDragging]);
 
   const toggleDropdown = (messageId) => {
     setActiveDropdown(activeDropdown === messageId ? null : messageId);
@@ -140,7 +144,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
     e.stopPropagation();
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      const newImages = [...images, ...files];             // creates a array of existing image and newly dropped files
+      const newImages = [...images, ...files]; // creates a array of existing image and newly dropped files
       setImages(newImages);
       const readers = files.map((file) => {
         const reader = new FileReader();
@@ -152,7 +156,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
 
       Promise.all(readers).then((previews) => {
         setImagePreviews([...imagePreviews, ...previews]);
-        previews.forEach((preview) => insertImageIntoContentEditable(preview));     //ittrates over the perview anf insert each emage into the contentEditable div
+        previews.forEach((preview) => insertImageIntoContentEditable(preview)); //ittrates over the perview anf insert each emage into the contentEditable div
       });
     }
   };
@@ -163,52 +167,61 @@ const ChatWindow = ({ appId,roomId,user }) => {
 
   const renderMessage = (text, images) => {
     // const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]|(www\.)[^\s]+)[^>]/gi;
-    text = text.replace(/&nbsp;/g, ' ');
-    const urlPattern = /\b(?:https?|ftp|file):\/\/[^\s<>"'()]+(?=\s|$|(?=<))|(?<![\w.-])www\.[^\s<>"'()]+(?=\s|$|(?=<))/gi;
-    let parts = [];       // used to store text,link and images
+    text = text.replace(/&nbsp;/g, " ");
+    const urlPattern =
+      /\b(?:https?|ftp|file):\/\/[^\s<>"'()]+(?=\s|$|(?=<))|(?<![\w.-])www\.[^\s<>"'()]+(?=\s|$|(?=<))/gi;
+    let parts = []; // used to store text,link and images
     let lastIndex = 0;
-    let match;            // used to store the url patterns
- 
+    let match; // used to store the url patterns
+
     // Function to add onClick to images in the text and style them as block elements
     const addOnClickToImages = (html) => {
-      return html.replace(/<img\s([^>]*?)src=["']([^"']*)["']([^>]*?)>/gi, (match, p1, src, p2) => {
-        return `<img ${p1}src="${src}"${p2} style="display:block;cursor:pointer;max-width:100%;max-height:150px;" onclick="window.handleImageClick('${src}')" />`;
-      });
+      return html.replace(
+        /<img\s([^>]*?)src=["']([^"']*)["']([^>]*?)>/gi,
+        (match, p1, src, p2) => {
+          return `<img ${p1}src="${src}"${p2} style="display:block;cursor:pointer;max-width:100%;max-height:150px;" onclick="window.handleImageClick('${src}')" />`;
+        }
+      );
     };
- 
-    while ((match = urlPattern.exec(text)) !== null) {       // iterates through message searching for URL using the URLPatern
+
+    while ((match = urlPattern.exec(text)) !== null) {
+      // iterates through message searching for URL using the URLPatern
       const url = match[0];
-      if (match.index > lastIndex) {                      // if there is text betwwen 2 image it pushes the message in parts array
+      if (match.index > lastIndex) {
+        // if there is text betwwen 2 image it pushes the message in parts array
         parts.push(text.substring(lastIndex, match.index));
       }
- 
-      const href = url.startsWith('www.') ? `http://${url}` : url;
+
+      const href = url.startsWith("www.") ? `http://${url}` : url;
       parts.push(
         <a
           key={url}
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: 'blue', textDecoration: 'underline' }}
+          style={{ color: "blue", textDecoration: "underline" }}
         >
           {url}
         </a>
       );
-      lastIndex = match.index + match[0].length;               //check if there is text after last url match it pushes to parts
+      lastIndex = match.index + match[0].length; //check if there is text after last url match it pushes to parts
     }
- 
+
     if (lastIndex < text.length) {
       parts.push(text.substring(lastIndex));
     }
- 
+
     return (
       <div>
         {parts.map((part, index) => {
-          if (typeof part === 'string' && !urlPattern.test(part)) {
+          if (typeof part === "string" && !urlPattern.test(part)) {
             // Render non-URL parts as HTML with onclick for images
             const htmlWithOnClick = addOnClickToImages(part);
             return (
-              <span key={index} dangerouslySetInnerHTML={{ __html: htmlWithOnClick }} />
+              <span
+                key={index}
+                dangerouslySetInnerHTML={{ __html: htmlWithOnClick }}
+              />
             );
           } else {
             // Render URLs directly
@@ -218,8 +231,6 @@ const ChatWindow = ({ appId,roomId,user }) => {
       </div>
     );
   };
-
-
 
   const insertImageIntoContentEditable = (imageUrl) => {
     if (contentEditableRef.current) {
@@ -234,135 +245,141 @@ const ChatWindow = ({ appId,roomId,user }) => {
       //     setViewingImage(imageUrl);
       //     setZoom(1);
       // };
-  
+
       const range = document.createRange();
       const sel = window.getSelection();
       range.selectNodeContents(contentEditableRef.current);
       range.collapse(false);
       range.insertNode(img);
-      range.setStartAfter(img);  // Move the cursor after the image
+      range.setStartAfter(img); // Move the cursor after the image
       range.collapse(true);
       sel.removeAllRanges();
       sel.addRange(range);
-      contentEditableRef.current.focus();  // Focus the contentEditable element
+      contentEditableRef.current.focus(); // Focus the contentEditable element
     }
   };
-  
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
-  
-    if (contentEditableRef.current) {  // get the inner Html of the div and set the div to contenteditable = true
-  
+
+    if (contentEditableRef.current) {
+      // get the inner Html of the div and set the div to contenteditable = true
+
       const contentHtml = contentEditableRef.current.innerHTML.trim(); // Trim whitespace from both ends
-      const messageData = {appId, message: contentHtml, finalroom, user };
-  
+      const messageData = { appId, message: contentHtml, finalroom, user };
+
       // Check if there are any images to process
       if (images.length > 0) {
         const readers = images.map((img) => {
-          const reader = new FileReader();         //FileReader is used to read each image file
+          const reader = new FileReader(); //FileReader is used to read each image file
           return new Promise((resolve) => {
             reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(img);           // readAsDataURL converts the file into data URL string
+            reader.readAsDataURL(img); // readAsDataURL converts the file into data URL string
           });
         });
-        Promise.all(readers).then((imageResults) => {          // when promise is resolved then executes the callback function .then part
+        Promise.all(readers).then((imageResults) => {
+          // when promise is resolved then executes the callback function .then part
           // Send the message with images included as HTML
-          socket.emit("message", {...messageData, images: imageResults });      // send mwssage data and image data URL (imageresult)
-          console.log("appid check0",appId)
+          socket.emit("message", { ...messageData, images: imageResults }); // send mwssage data and image data URL (imageresult)
+          console.log("appid check0", appId);
           setMessage("");
           setImages([]);
           setImagePreviews([]);
           contentEditableRef.current.innerHTML = ""; // Clear the contentEditable div
         });
-      } else if (contentHtml !== "" && contentHtml.replace(/<[^>]*>/g, '').trim() !== "") {    // to check its valid message or empty html
+      } else if (
+        contentHtml !== "" &&
+        contentHtml.replace(/<[^>]*>/g, "").trim() !== ""
+      ) {
+        // to check its valid message or empty html
         // Send the content with text only
         socket.emit("message", messageData);
         setMessage("");
         contentEditableRef.current.innerHTML = ""; // Clear the contentEditable div
       } else {
-        return;           // If there's no content and no images, do nothing
+        return; // If there's no content and no images, do nothing
       }
     }
   };
-  
-  
+
   const handleContentChange = (e) => {
     const contentEditableElement = e.currentTarget;
     const selection = window.getSelection();
-    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : document.createRange();
-  
+    const range =
+      selection.rangeCount > 0
+        ? selection.getRangeAt(0)
+        : document.createRange();
+
     // Save the current cursor position
     const cursorPosition = {
       offset: range.startOffset,
       container: range.startContainer,
     };
-  
+
     // Function to color URLs in the text
     const colorUrls = (text) => {
       const urlRegex = /https:\/\/([^\/\.]+)\.([^\/\s]+(?:\/[^\s]*)?)/gi;
       return text;
     };
-  
+
     const processNodes = (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         // Replace text content with colored URLs
         const newTextContent = colorUrls(node.textContent);
         if (newTextContent !== node.textContent) {
           // Replace text node with a new span containing the formatted text
-          const newSpan = document.createElement('span');
+          const newSpan = document.createElement("span");
           newSpan.innerHTML = newTextContent;
           node.replaceWith(...newSpan.childNodes);
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
-        if (node.nodeName === 'IMG') {
+        if (node.nodeName === "IMG") {
           // Do nothing, preserve <img> tags as HTML
           return;
         } else {
           // Convert element's content to plain text
           const plainText = node.innerText;
-  
+
           // Process the plain text to color URLs
           const coloredText = colorUrls(plainText);
-  
+
           // Replace the element with a new text node containing the colored text
           const newTextNode = document.createTextNode(coloredText);
           node.replaceWith(newTextNode);
         }
       }
     };
-  
+
     // Process the content without replacing the entire innerHTML
     // [Text, Img, text, <div><span>text</span></div>]
     Array.from(contentEditableElement.childNodes).forEach(processNodes);
-  
-  
-  
+
     // Restore cursor position
     const restoreCursor = () => {
       const newRange = document.createRange();
       newRange.setStart(cursorPosition.container, cursorPosition.offset);
       newRange.collapse(true);
-  
+
       selection.removeAllRanges();
       selection.addRange(newRange);
     };
-  
+
     restoreCursor();
   };
-  
+
   const handleFiles = (files) => {
-    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));    // chechks the MIME type that starts with '/image"
-  
+    const imageFiles = Array.from(files).filter((file) =>
+      file.type.startsWith("image/")
+    ); // chechks the MIME type that starts with '/image"
+
     if (imageFiles.length === 0) {
       console.log("No valid image files selected");
       return;
     }
-  
-  
+
     const newImages = [...images, ...imageFiles];
     setImages(newImages);
-  
+
     const readers = imageFiles.map((file) => {
       const reader = new FileReader();
       return new Promise((resolve) => {
@@ -370,7 +387,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
         reader.readAsDataURL(file);
       });
     });
-  
+
     Promise.all(readers).then((previews) => {
       setImagePreviews([...imagePreviews, ...previews]);
       previews.forEach((preview) => insertImageIntoContentEditable(preview));
@@ -378,13 +395,13 @@ const ChatWindow = ({ appId,roomId,user }) => {
   };
   useEffect(() => {
     // Client-side code here
- 
+
     // Set global handler for image click
     window.handleImageClick = (src) => {
       setViewingImage(src);
       setZoom(1);
     };
- 
+
     return () => {
       // Cleanup if needed
     };
@@ -394,7 +411,7 @@ const ChatWindow = ({ appId,roomId,user }) => {
     const files = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      if (item.type.startsWith('image/')) {
+      if (item.type.startsWith("image/")) {
         const file = item.getAsFile();
         files.push(file);
       }
@@ -405,12 +422,12 @@ const ChatWindow = ({ appId,roomId,user }) => {
       contentEditableRef.current.focus();
     }
   };
-  
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     handleFiles(files);
   };
-  
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       // Prevent the default action for Enter key (adding a new line)
@@ -424,12 +441,12 @@ const ChatWindow = ({ appId,roomId,user }) => {
     setIsHolding(true);
     setDragStartPoint({ x: e.clientX, y: e.clientY });
     setImageDragging(false);
-    console.log("Hold chexk", isHolding)
+    console.log("Hold chexk", isHolding);
   };
 
   const handleMouseMove = (e) => {
     if (!isHolding) return;
-    console.log("holding check agian",isHolding)
+    console.log("holding check agian", isHolding);
 
     const dx = e.clientX - dragStartPoint.x;
     const dy = e.clientY - dragStartPoint.y;
@@ -439,16 +456,16 @@ const ChatWindow = ({ appId,roomId,user }) => {
     }
 
     if (imageDragging) {
-      setImagePosition(prevPosition => ({
+      setImagePosition((prevPosition) => ({
         x: prevPosition.x + dx,
-        y: prevPosition.y + dy
+        y: prevPosition.y + dy,
       }));
       setDragStartPoint({ x: e.clientX, y: e.clientY });
     }
   };
 
   const handleMouseUp = () => {
-    console.log("working")
+    console.log("working");
     if (isHolding && !imageDragging) {
       // This was a click, not a drag
       setZoom(1);
@@ -461,166 +478,171 @@ const ChatWindow = ({ appId,roomId,user }) => {
     setOriginalSize({ width: naturalWidth, height: naturalHeight });
   };
 
-const chatbox =()=>{
+  const chatbox = () => {
     setChatBoxOpen(!chatboxopen);
-  }
+  };
 
   return (
     // <div className="w-screen bg-accent h-100%">
-     <div >
-      {
-        chatboxopen ?(
-          <div className="rounded-2xl  h-screen w-auto p-[2%] ">
-            <div  className="flex flex-row h-[5%] bg-primary rounded-t-lg py-[1%]">
-              <div className="w-[90%] h-[100%]"></div>
-              <button onClick={chatbox} className=" w-[10%] h-[100%] "><img src="https://www.svgrepo.com/show/80301/cross.svg"  alt = "close icon"  className = "h-[80%] w-[90%]  invert"></img></button>
-            </div>
-        <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg">
-          
-          <div className="flex flex-col-reverse p-3 mt-5 mr-2 overflow-auto scrollbar-thin scrollbar-thumb-rounded-sm scrollbar-thumb-black">
-            <div className="flex flex-col gap-3 p-2 w-[100%]">
-              {data.map((msg, index) =>
-                msg.user === user ? (
-                  <div
-                    key={index}
-                    className="relative bg-joinbutton flex flex-row self-end max-w-[80%] border-[1px] border-black rounded-[25px] p-1"
-                  >
-                    <p className="text-wrap m-2 word overflow-x-auto word">
-                      {renderMessage(msg.message)}
-                    </p>
-                  </div>
-                ) : (
-                  <div
-                    key={index}
-                    className="bg-secondary flex flex-col max-w-[80%] border-[1px] border-text rounded-[25px] w-fit p-1"
-                  >
-                    {msg.user === data[index - 1 > 0 ? index - 1 : 0].user && //functionality to not give every message with user if the last message is from same user
-                    index != 0 ? (
-                      <span className="m-0.5 bg-secondary pl-1 pr-1  text-black rounded-2xl text-wrap word overflow-x-auto word ">
+    <div>
+      {chatboxopen ? (
+        <div className="rounded-2xl  h-screen w-auto p-[2%] ">
+          <div className="flex flex-row h-[5%] bg-primary rounded-t-lg py-[1%]">
+            <div className="w-[95%] h-[100%]"></div>
+            <button onClick={chatbox} className=" w-[10%] h-[100%] ">
+              <img
+                src="https://www.svgrepo.com/show/80301/cross.svg"
+                alt="close icon"
+                className="h-[60%] w-[90%]  invert"
+              ></img>
+            </button>
+          </div>
+          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg">
+            <div className="flex flex-col-reverse p-3 mt-5 mr-2 overflow-auto custom-scrollbar mb-1">
+              <div className="flex flex-col gap-3 p-2 w-[100%]">
+                {data.map((msg, index) =>
+                  msg.user === user ? (
+                    <div
+                      key={index}
+                      className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1 hover:bg-senderhover shadow-lg "
+                    >
+                      <p className="text-wrap m-2 word overflow-x-auto word">
                         {renderMessage(msg.message)}
-                      </span>
-                    ) : (
-                      <div className="flex flex-col">
-                        <span
-                          className={`pt-1 pl-1 pr-1  mt-0 text-[20px] font-bold text-black `}
-                        >
-                          {msg.user} :
-                        </span>
-                        <span className=" mb-[2px] pl-1 pr-1 pb-1 text-black rounded-xl text-wrap word overflow-x-auto word ">
+                      </p>
+                    </div>
+                  ) : (
+                    <div
+                      key={index}
+                      className="bg-receiver flex flex-col max-w-[80%]   rounded-[5px] w-fit p-1 hover:bg-receiverhover shadow-lg"
+                    >
+                      {msg.user === data[index - 1 > 0 ? index - 1 : 0].user && //functionality to not give every message with user if the last message is from same user
+                      index != 0 ? (
+                        <span className="m-0.5  pl-1 pr-1  text-black rounded-2xl text-wrap word overflow-x-auto word ">
                           {renderMessage(msg.message)}
                         </span>
-                      </div>
-                    )}
-                  </div>
-                )
-              )}
+                      ) : (
+                        <div className="flex flex-col">
+                          <span
+                            className={`pt-1 pl-1 pr-1  mt-0 text-[20px] font-bold text-black `}
+                          >
+                            {msg.user} :
+                          </span>
+                          <span className=" mb-[2px] pl-1 pr-1 pb-1 text-black rounded-xl text-wrap word overflow-x-auto word ">
+                            {renderMessage(msg.message)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
             </div>
+
+            <form onSubmit={handleSubmit}>
+              <div className="bg-background flex  flex-row  p-1 h-[100%]">
+                <input
+                  type="file"
+                  multiple
+                  id="fileInput"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <div
+                  ref={contentEditableRef}
+                  contentEditable
+                  onInput={handleContentChange}
+                  onDrop={handleDrop}
+                  onPaste={handlePaste}
+                  onKeyDown={handleKeyDown}
+                  onDragOver={handleDragOver}
+                  className="flex-grow bg-white border rounded-[25px] px-4 py-2 overflow-y-auto rounded-r-none "
+                  placeholder="Type your message..."
+                  style={{
+                    whiteSpace: "break-spaces",
+                    overflowWrap: "break-word",
+                    overflowY: "auto",
+                    maxHeight: "100px",
+                    border: "solid 1px black",
+                    Width: "80%",
+                    maxWidth: "80%",
+                  }}
+                />
+                <div className="h-[100%] w-[20%] flex flex-col justify-end">
+                  <div className="flex flex-row w-full">
+                    <label
+                      htmlFor="fileInput"
+                      className="cursor-pointer w-[50%] pr-0 pl-0 h-[100%] border px-2 py-1 border-l-0"
+                    >
+                      <img
+                        src="https://www.svgrepo.com/show/490988/attachment.svg"
+                        alt="Attachment"
+                        className="h-[100%] w-[100%]"
+                      />
+                    </label>
+                    <button className="w-[50%] pl-0 pr-0 h-[100%] border rounded-r-full px-2 py-1 border-l-0">
+                      <img
+                        src="https://www.svgrepo.com/show/533310/send-alt-1.svg"
+                        alt="Send"
+                        className="h-[100%] w-[100%]"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
-
-          <form
-            className="form"
-            onSubmit={handleSubmit}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-          >
-            {/* <input
-              type="text"
-              placeholder="Enter message"
-              className="input"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            /> */}
-
-            <input
-              type="file"
-              multiple
-              id="fileInput"
-              onChange={handleImageChange}
-              className="hidden"
-            />
+          {viewingImage && (
             <div
-              ref={contentEditableRef}
-              contentEditable
-              onInput={handleContentChange}
-              onPaste={handlePaste}
-              onKeyDown={handleKeyDown}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              className="input"
-              placeholder="Type your message..."
-              style={{
-                //whiteSpace: 'pre-wrap',
-
-                whiteSpace: "break-spaces",
-                overflowWrap: "break-word",
-                overflowY: "auto",
-                maxHeight: "150px",
-                // Adjust the max height to fit your needs
-              }}
-            />
-            <label htmlFor="fileInput" className="cursor-pointer h-[100%]  w-[10%]">
-              <img
-                src="https://www.svgrepo.com/show/490988/attachment.svg"
-                alt="Attachment"
-                className="h-[100%]  w-[100%]"
-                
-              />
-            </label>
-            <button type="submit" className="w-[10%] h-[100%]">
-            
-              <img src ="https://www.svgrepo.com/show/533310/send-alt-1.svg" className="  h-[100%] w-[100%]"></img>
-            </button>
-          </form>
-        </div>
-        {viewingImage && (
-          <div
-            className="image-viewer-overlay"
-            onClick={(e) =>
-              e.currentTarget === e.target && setViewingImage(null)
-            }
-            onMouseUp={handleMouseUp}
-          >
-            <div
-              className="image-viewer-container "
-              style={
-                {
-                  // cursor: "pointer",
-                }
-              }
-              onMouseUp={handleMouseUp}
+              className="image-viewer-overlay"
               onClick={(e) =>
                 e.currentTarget === e.target && setViewingImage(null)
               }
+              onMouseUp={handleMouseUp}
             >
-              <img
-                ref={imageRef}
-                src={viewingImage}
-                alt="Viewing"
-                className="image-viewer-img"
-                style={{
-                  position: "absolute",
-                  top: `${imagePosition.y}px`,
-                  left: `${imagePosition.x}px`,
-                  transform: `scale(${zoom})`,
-                  cursor: isHolding ? "grabbing" : "grab",
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                // onMouseUp={handleMouseUp}
-                onLoad={handleImageLoad}
-              />
+              <div
+                className="image-viewer-container "
+                style={
+                  {
+                    // cursor: "pointer",
+                  }
+                }
+                onMouseUp={handleMouseUp}
+                onClick={(e) =>
+                  e.currentTarget === e.target && setViewingImage(null)
+                }
+              >
+                <img
+                  ref={imageRef}
+                  src={viewingImage}
+                  alt="Viewing"
+                  className="image-viewer-img"
+                  style={{
+                    position: "absolute",
+                    top: `${imagePosition.y}px`,
+                    left: `${imagePosition.x}px`,
+                    transform: `scale(${zoom})`,
+                    cursor: isHolding ? "grabbing" : "grab",
+                  }}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  // onMouseUp={handleMouseUp}
+                  onLoad={handleImageLoad}
+                />
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-        ):(
-          <button onClick={chatbox} className="w-[13%] h-[8%] rounded-full bg-joinbutton2 absolute bottom-[3%] right-[3%] items-center hover:w-[16%] hover:h-[10%] ">
-            <img src ="https://www.svgrepo.com/show/529480/chat-round-line.svg"  className="  mx-auto h-[70%] invert"></img>
-          </button>
-          
-        )
-      }
-      
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={chatbox}
+          className="w-[13%] h-[8%] rounded-full bg-joinbutton2 absolute bottom-[3%] right-[3%] items-center hover:w-[16%] hover:h-[10%] "
+        >
+          <img
+            src="https://www.svgrepo.com/show/529480/chat-round-line.svg"
+            className="  mx-auto h-[70%] invert"
+          ></img>
+        </button>
+      )}
     </div>
     // </div>
   );
