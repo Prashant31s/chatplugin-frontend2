@@ -20,6 +20,9 @@ const ChatWindow = ({ appId, roomId, user }) => {
   const [dragStartPoint, setDragStartPoint] = useState({ x: 0, y: 0 });
   const [imageDragging, setImageDragging] = useState(false);
   const [chatboxopen, setChatBoxOpen] = useState(false);
+  const [editingMessageId, setEditingMessageId] = useState(null);
+
+  // const [activeDropdown, setActiveDropdown] = useState(null);
   // const handleSubmit = (e) => {
   //   //triggers when send button is licked
   //   e.preventDefault();
@@ -36,36 +39,90 @@ const ChatWindow = ({ appId, roomId, user }) => {
   }, []);
 
   useEffect(() => {
+    console.log("2");
     socket.emit("join-room", finalroom);
     socket.on("messageHistory", (messages) => {
-      //gets the history of room from server and put it in the state to display in ui
-      //console.log("mesagesss",messages)
-      let mes = messages.map((msg) => ({
-        message: msg.message,
-        user: msg.user,
+     
+      const formattedMessages = messages.map((msg) => ({
+        ...msg,
+        createdAt: msg.createdAt ? new Date(msg.createdAt) : null,
       }));
-      setData(mes);
-      //console.log("daaaaata", messages);
+      setData(formattedMessages);
     });
   }, [appId, user]);
+  //changes
+  // useEffect(() => {
+  //   //console.log("sfg", data);
+  //   console.log("3");
+  //   data.map((userdata) => {
+  //     const date = new Date(userdata.date);
+  //     const year = date.getFullYear();
+  //     const month = date.getMonth() + 1;
+  //     const day = date.getDate();
+  //     const hours = date.getHours();
+  //     const minutes = date.getMinutes();
+  //     const seconds = date.getSeconds();
+  //     const messagedate = `${day}-${month}-${year}`;
+  //     const messagetime = `${hours}:${minutes}`;
+  //     userdata.messagetime = messagetime.toString();
+  //     userdata.messageDate = messagedate.toString();
+  //     // console.log(
+  //     //   "useer",
+  //     //   year,
+  //     //   month,
+  //     //   day,
+  //     //   hours,
+  //     //   minutes,
+  //     //   seconds,
+  //     //   messagetime,
+  //     //   messagedate
+  //     // );
+  //   });
+  // }, [data]);
+
+  
 
   useEffect(() => {
+    console.log("5");
     socket.on("receive-message", (newMessage) => {
-      //console.log("newm", newMessage);
+      console.log("Received new message:", newMessage);
       setData((prevData) => [
         ...prevData,
-        { message: newMessage.message, user: newMessage.user }, //adds the message received in state
+        {
+          ...newMessage,
+          createdAt: newMessage.createdAt
+            ? new Date(newMessage.createdAt)
+            : null,
+        },
       ]);
+    });
+
+    socket.on("message-edited", ({ messageId, newContent }) => {
+      console.log("edited", newContent);
+      setData((prevData) =>
+        prevData.map(
+          (msg) =>
+            msg._id === messageId ? { ...msg, message: newContent } : msg //make the edits in message in the state
+        )
+      );
+    });
+
+    socket.on("message-deleted", ({ messageId }) => {
+      setData(
+        (prevData) => prevData.filter((msg) => msg._id !== messageId) //remove the deleted message from the state
+      );
     });
 
     return () => {
       socket.off("receive-message");
+      socket.off("message-edited");
+      socket.off("message=deleted");
     };
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     // Centers the image when it is viewed and adjusts the position on window resize.
-    console.log("3");
+    //console.log("7");
     if (viewingImage) {
       const handleResize = () => {
         console.log("chalaaa");
@@ -105,7 +162,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
   }, [viewingImage]);
 
   useEffect(() => {
-    console.log("4");
+    //console.log("8");
     const handleScroll = (e) => {
       if (viewingImage) {
         e.preventDefault();
@@ -126,6 +183,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
   useEffect(() => {
     // Add global event listeners
     // window.addEventListener('mousemove', handleMouseMove);
+    console.log("9");
     window.addEventListener("mouseup", handleMouseUp);
 
     // Cleanup function to remove event listeners
@@ -136,7 +194,24 @@ const ChatWindow = ({ appId, roomId, user }) => {
   }, [isHolding, imageDragging]);
 
   const toggleDropdown = (messageId) => {
+    console.log("mes", messageId);
     setActiveDropdown(activeDropdown === messageId ? null : messageId);
+  };
+  const handleEdit = (messageId, currentContent) => {
+    // Load the content of the message to the contentEditable div
+    if (contentEditableRef.current) {
+      contentEditableRef.current.innerHTML = currentContent;
+      moveCursorToEnd(contentEditableRef.current);  // Move cursor to the end of the content
+    }
+ 
+    setEditingMessageId(messageId);  // Track the message being edited
+    setActiveDropdown(null);
+  };
+ 
+  const handleDelete = (messageId) => {
+    //triggers when message delete button is clicked
+    socket.emit("delete-message", { messageId, room: finalroom });
+    setActiveDropdown(null);
   };
 
   const handleDrop = (e) => {
@@ -179,7 +254,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
       return html.replace(
         /<img\s([^>]*?)src=["']([^"']*)["']([^>]*?)>/gi,
         (match, p1, src, p2) => {
-          return `<img ${p1}src="${src}"${p2} style="display:block;cursor:pointer;max-width:100%;max-height:150px;" onclick="window.handleImageClick('${src}')" />`;
+          return `<img ${p1}src="${src}"${p2} style="display:block;cursor:pointer;max-width:100%;max-height:100px;" onclick="window.handleImageClick('${src}')" />`;
         }
       );
     };
@@ -237,7 +312,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
       const img = document.createElement("img");
       img.src = imageUrl;
       img.style.maxWidth = "100%";
-      img.style.maxHeight = "150px";
+      img.style.maxHeight = "100px";
       img.style.paddingTop = "2px"; // Add padding to the top
       img.style.paddingBottom = "2px"; // Add padding to the bottom
       // img.style.cursor = "pointer";
@@ -261,44 +336,45 @@ const ChatWindow = ({ appId, roomId, user }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+ 
     if (contentEditableRef.current) {
-      // get the inner Html of the div and set the div to contenteditable = true
-
-      const contentHtml = contentEditableRef.current.innerHTML.trim(); // Trim whitespace from both ends
-      const messageData = { appId, message: contentHtml, finalroom, user };
-
-      // Check if there are any images to process
-      if (images.length > 0) {
-        const readers = images.map((img) => {
-          const reader = new FileReader(); //FileReader is used to read each image file
-          return new Promise((resolve) => {
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(img); // readAsDataURL converts the file into data URL string
-          });
+      const contentHtml = contentEditableRef.current.innerHTML.trim();
+ 
+      if (editingMessageId) {
+        // Emit the edit message event
+        socket.emit("edit-message", {
+          messageId: editingMessageId,
+          newContent: contentHtml,
+          room: finalroom
         });
-        Promise.all(readers).then((imageResults) => {
-          // when promise is resolved then executes the callback function .then part
-          // Send the message with images included as HTML
-          socket.emit("message", { ...messageData, images: imageResults }); // send mwssage data and image data URL (imageresult)
-          console.log("appid check0", appId);
-          setMessage("");
-          setImages([]);
-          setImagePreviews([]);
-          contentEditableRef.current.innerHTML = ""; // Clear the contentEditable div
-        });
-      } else if (
-        contentHtml !== "" &&
-        contentHtml.replace(/<[^>]*>/g, "").trim() !== ""
-      ) {
-        // to check its valid message or empty html
-        // Send the content with text only
-        socket.emit("message", messageData);
-        setMessage("");
-        contentEditableRef.current.innerHTML = ""; // Clear the contentEditable div
+       
+        // Reset editing state
+        setEditingMessageId(null);
       } else {
-        return; // If there's no content and no images, do nothing
+        // Handle new message
+        const messageData = { appId, message: contentHtml, finalroom, user };
+ 
+        if (images.length > 0) {
+          const readers = images.map((img) => {
+            const reader = new FileReader();
+            return new Promise((resolve) => {
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(img);
+            });
+          });
+ 
+          Promise.all(readers).then((imageResults) => {
+            socket.emit("message", { ...messageData, images: imageResults });
+            setImages([]);
+            setImagePreviews([]);
+          });
+        } else if (contentHtml !== "" && contentHtml.replace(/<[^>]*>/g, "").trim() !== "") {
+          socket.emit("message", messageData);
+        }
       }
+ 
+      // Clear the contentEditable div
+      contentEditableRef.current.innerHTML = "";  // Clear the div after sending/editing
     }
   };
 
@@ -397,6 +473,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
     // Client-side code here
 
     // Set global handler for image click
+    console.log("10");
     window.handleImageClick = (src) => {
       setViewingImage(src);
       setZoom(1);
@@ -482,6 +559,59 @@ const ChatWindow = ({ appId, roomId, user }) => {
     setChatBoxOpen(!chatboxopen);
   };
 
+  const formatDate = (dateValue) => {
+    if (!dateValue) return "N/A";
+    const date = new Date(dateValue);
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    
+  };
+
+  const formatTime = (dateValue) => {
+    if (!dateValue) return "N/A";
+    const date = new Date(dateValue);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const shouldShowDateHeader = (currentMsg, prevMsg) => {
+    if (!prevMsg) return true;
+    const currentDate = new Date(currentMsg.createdAt).toDateString();
+    const prevDate = new Date(prevMsg.createdAt).toDateString();
+    return currentDate !== prevDate;
+  };
+  const name = (user) => {
+    let s = user.charAt(0).toUpperCase();
+    let space = false;
+    for (let i = 1; i < user.length; i++) {
+      if (space) {
+        s += user.charAt(i).toUpperCase();
+        break;
+      }
+      if (user.charAt(i) == " ") {
+        space = true;
+      }
+    }
+
+    if (s.length == 1) {
+      s += user.charAt(1).toUpperCase();
+    }
+    return s;
+  };
+  const moveCursorToEnd = (element) => {
+    const range = document.createRange();
+    const selection = window.getSelection();
+ 
+    range.selectNodeContents(element);
+    range.collapse(false); // Collapse the range to the end
+    selection.removeAllRanges();
+    selection.addRange(range);
+    element.focus();  // Ensure the contentEditable div gets focused
+  };
+
   return (
     // <div className="w-screen bg-accent h-100%">
     <div>
@@ -500,47 +630,153 @@ const ChatWindow = ({ appId, roomId, user }) => {
           <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg shadow-md p-2">
             <div className="flex   overflow-auto custom-scrollbar  ">
               <div className="flex flex-col gap-3  w-[100%] pr-0">
-                {data.map((msg, index) =>
+                {/* {data.map((msg, index) =>
                   msg.user === user ? (
-                    <div
-                      key={index}
-                      className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1  "
-                    >
-                      <p className="text-wrap m-2 word overflow-x-auto word">
-                        {renderMessage(msg.message)}
-                      </p>
+                    <div className="flex flex-col">
+                      <div className="text-[10px] text-gray-500 block ml-1 justify-end text-end mr-1">
+                        {formatTime(msg.createdAt)}
+                      </div>
+                      <div
+                        key={index}
+                        className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1 mr-1 "
+                      >
+                        <p className="text-wrap m-2 word overflow-x-auto word">
+                          {renderMessage(msg.message)}
+                        </p>
+                        <button
+                          onClick={() => toggleDropdown(msg._id)}
+                          className="mr-[10px] text-xl"
+                        >
+                          ⋮
+                        </button>
+                        {activeDropdown === msg._id && (
+                          <div className=" absolute right-full top-0 bg-white border rounded shadow-lg z-10 text-xs  mr-[5px] my-1">
+                            <button
+                              onClick={() => {
+                                handleEdit(msg._id, msg.nmessages);
+                              }}
+                              className="block py-[3px] text-black hover:bg-secondary rounded-[3px] w-14"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleDelete(msg._id);
+                              }}
+                              className="block  py-[3px] text-red-500 hover:bg-red rounded-[3px] w-14"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ) : (
-                    <div
-                      key={index}
-                      className="bg-receiver flex flex-col max-w-[80%]   rounded-[5px] w-fit  "
-                    >
-                      {msg.user === data[index - 1 > 0 ? index - 1 : 0].user && //functionality to not give every message with user if the last message is from same user
-                      index != 0 ? (
-                        <span className="m-0.5  pl-1 pr-1  text-black rounded-2xl text-wrap word overflow-x-auto word ">
-                          {renderMessage(msg.message)}
-                        </span>
-                      ) : (
-                        <div className="flex flex-col">
-                          <span
-                            className={`pt-1 pl-1 pr-1  mt-0 text-[15px] font-semibold text-black `}
-                          >
-                            {msg.user} :
-                          </span>
-                          <span className=" mb-[2px] pl-1 pr-1 pb-1 text-black rounded-xl text-wrap word overflow-x-auto word ">
-                            {renderMessage(msg.message)}
-                          </span>
+                    <div className="flex flex-row">
+                      <div className="flex bg-joinbutton rounded-full w-7 items-center justify-center h-7 mr-1 mt-3 text-center text-[12px]  font-bold">
+                        {name(msg.user)}
+                      </div>
+                      <div className="w-[80%]">
+                        <div className="text-[10px] ">
+                          <span className="mr-1">{msg.user}</span>
+                          <span>{formatTime(msg.createdAt)}</span>
                         </div>
-                      )}
+
+                        <div
+                          key={index}
+                          className="bg-receiver flex flex-col max-w-[100%]   rounded-[5px] w-fit  "
+                        >
+                          <div className="flex flex-col">
+                            <span className=" mb-[2px] pl-1 pr-1 pb-1 text-black rounded-xl text-wrap word overflow-x-auto word ">
+                              {renderMessage(msg.message)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )
-                )}
+                )} */}
+                {data.map((msg, index) => (
+                  <React.Fragment key={index}>
+                    {shouldShowDateHeader(msg, data[index - 1]) && (
+                      <div className="text-center my-2">
+                        <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded-full  text-[10px] text-text">
+                          {formatDate(msg.createdAt)}
+                        </span>
+                      </div>
+                    )}
+                    {msg.user === user ? (
+                      <div className="flex flex-col">
+                        <div className="text-[10px] text-gray-500 block ml-1 justify-end text-end mr-1 text-text2">
+                          {formatTime(msg.createdAt)}
+                        </div>
+                        <div
+                          key={index}
+                          className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1 mr-1 "
+                        >
+                          <p className="text-wrap m-2 word overflow-x-auto word text-text text-[12px]">
+                            {renderMessage(msg.message)}
+                          </p>
+                          <button
+                            onClick={() => toggleDropdown(msg._id)}
+                            className="mr-[10px] text-xl text-sender hover:text-text "
+                          >
+                            ⋮
+                          </button>
+                          {activeDropdown === msg._id && (
+                            <div className=" absolute right-full top-0 bg-white border rounded shadow-lg z-10 text-xs  mr-[5px] my-1 border-text2">
+                              <button
+                                  onClick={() => {
+                                    handleEdit(msg._id, msg.message);  // Ensure `msg.message` is passed here for editing
+                                  }}
+                                  className="block py-[3px] text-black hover:bg-secondary rounded-[3px] w-14 text-text"
+                                >
+                                  Edit
+                                </button>
+                              <button
+                                onClick={() => {
+                                  handleDelete(msg._id);
+                                }}
+                                className="block  py-[3px] text-red-500 hover:bg-red rounded-[3px] w-14 text-text"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-row">
+                        <div className="bg-joinbutton rounded-full w-6 h-6 mr-1 mt-[15px] text-center text-[10px] font-bold flex items-center justify-center ">
+                          {name(msg.user)}
+                        </div>
+                        <div className="w-[80%]">
+                          <div className="text-[10px] text-text2 ">
+                            <span className="mr-1 ">{msg.user}</span>
+                            <span >{formatTime(msg.createdAt)}</span>
+                          </div>
+
+                          <div
+                            key={index}
+                            className="bg-receiver flex flex-col max-w-[100%]   rounded-[5px] w-fit  "
+                          >
+                            <div className="flex flex-col">
+                              <span className="  p-[3px] text-black rounded-xl text-wrap word overflow-x-auto word text-text text-[12px]">
+                                {renderMessage(msg.message)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="">
-              <div className="bg-background flex  flex-row   py-2 h-[100%] rounded-b-lg  ">
-                <div className="bg-receiverhover  flex flex-row rounded-[10px] w-[100%] h-[100%] ">
+            <form onSubmit={handleSubmit} className="h-[10%]">
+              <div className="bg-background flex  flex-row   pt-3 h-[100%] rounded-b-lg items-center text-start justify-center  pb-0">
+                <div className="bg-receiverhover  flex flex-row rounded-[10px] w-[100%] h-[100%]">
                   <input
                     type="file"
                     multiple
@@ -556,36 +792,36 @@ const ChatWindow = ({ appId, roomId, user }) => {
                     onPaste={handlePaste}
                     onKeyDown={handleKeyDown}
                     onDragOver={handleDragOver}
-                    className="flex-grow bg-white  rounded-[10px] py-1 px-2 overflow-y-auto custom-scrollbar  bg-receiverhover  "
+                    className="flex-grow bg-white  rounded-[10px]  px-2 overflow-y-auto custom-scrollbar  bg-receiverhover outline-none  "
                     placeholder="Type your message..."
                     style={{
                       whiteSpace: "break-spaces",
                       overflowWrap: "break-word",
                       overflowY: "auto",
                       maxHeight: "100px",
-                     
+                      height:"100%",
                       width: "80%",
                       scrollbarWidth: "thin",
                       scrollbarColor: "#888 #f0f0f0",
                     }}
                   />
-                  <div className="h-[100%] w-[20%] flex flex-col justify-center ">
-                    <div className="flex flex-row w-full">
+                  <div className="h-[100%] w-[20%] flex flex-col justify-center  ">
+                    <div className="flex flex-row w-full p-[20%] pr-0">
                       <label
                         htmlFor="fileInput"
-                        className="cursor-pointer w-[50%]  h-[100%]  px-1 py-1 border-x-0"
+                        className=" cursor-pointer w-[50%]  h-[100%] items-center justify-center text-center flex  mr-1"
                       >
                         <img
                           src="https://www.svgrepo.com/show/457374/attachment.svg"
                           alt="Attachment"
-                          className="h-[100%] w-[100%]"
+                          className="h-[75%] "
                         />
                       </label>
-                      <button className="w-[50%] pl-0 pr-0 h-[100%]  rounded-r-full px-2 py-1 border-l-0 ">
+                      <button className="w-[50%] pl-0 pr-0 h-[100%]  rounded-r-full px-2 py-1  ">
                         <img
                           src="https://www.svgrepo.com/show/309946/send.svg"
                           alt="Send"
-                          className="h-[80%] w-[800%]"
+                          className="h-[80%] "
                         />
                       </button>
                     </div>
@@ -638,7 +874,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
       ) : (
         <button
           onClick={chatbox}
-          className="w-[13%] h-[8%] rounded-full bg-joinbutton2 absolute bottom-[3%] right-[3%] items-center hover:w-[16%] hover:h-[10%] "
+          className="w-[45px] h-[45px] rounded-full bg-primary absolute bottom-[3%] right-[3%] items-center  "
         >
           <img
             src="https://www.svgrepo.com/show/529480/chat-round-line.svg"
