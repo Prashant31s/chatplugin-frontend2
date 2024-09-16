@@ -22,7 +22,9 @@ module.exports = {
     'sender':'#f6fdf6',
     'senderhover':'#ecf6ec',
     'receiver':'#f7f7f7',
-    'receiverhover':'#ececec'
+    'receiverhover':'#ececec',
+    'delete':"#ececec",
+    'red':"#FF0000",
      },
     extend: {},
   },
