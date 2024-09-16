@@ -32,6 +32,91 @@
   margin-bottom: 0.25%;
   border-radius: 0.25%;
 }
+.message-container {
+  position: relative;
+  background-color: #f0f0f0; /* Or whatever background color you need */
+  max-width: 80%;
+  padding: 1px; /* Adjust padding as needed */
+  border-radius: 4px;
+}
+
+.message-container:hover .message-actions {
+  opacity: 1;
+}
+
+/* Message styling */
+.message-container p {
+  word-wrap: break-word;
+  white-space: break-spaces;
+  overflow-x: auto;
+  padding: 1px;
+  font-size: 0.7rem; /* Adjust based on design needs */
+  color: black;
+  background-color: #ececec; /* Message background color */
+}
+
+
+.message-actions {
+  display: flex;
+  gap: 5px; /* Space between buttons */
+  position: absolute;
+  top: -30px; /* Adjust this based on your layout */
+  right: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.emoji-dropdown {
+  display: flex;
+  gap: 5px;
+  background-color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 24px;
+}
+
+.emoji-reaction {
+  font-size: 24px;
+  cursor: pointer;
+  display: none;
+
+}
+
+.message-container:hover .emoji-reaction {
+  display: flex;
+}
+
+.message-actions button {
+  font-size: 10px;
+  padding: 3px 5px;
+  border-radius: 3px;
+}
+
+.message-actions button.edit {
+  color: black;
+  background-color: #e0e0e0; /* Adjust as needed */
+}
+
+
+.message-actions button.delete {
+  color: red;
+  background-color: #ffe0e0; /* Adjust as needed */
+}
+
+.reactions-container {
+  display: flex;
+  direction: rtl;
+  gap: 6px;
+
+  font-size: 10px;
+}
+.reactions-container1 {
+  display: flex;
+  direction: row-reverse;
+  gap: 6px;
+  font-size: 10px;
+}
 
 /* Message input form */
 /* .form {
@@ -120,6 +205,7 @@
 
 .custom-scrollbar {
   /* Width of the scrollbar */
+  
   scrollbar-width: thin; /* For Firefox */
   scrollbar-color: #888 #f0f0f0; /* For Firefox */
 }
