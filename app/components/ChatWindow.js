@@ -21,7 +21,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
   const [imageDragging, setImageDragging] = useState(false);
   const [chatboxopen, setChatBoxOpen] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState(null);
-
+  const [activeReactionDropdown, setActiveReactionDropdown] = useState(null);
   // const [activeDropdown, setActiveDropdown] = useState(null);
   // const handleSubmit = (e) => {
   //   //triggers when send button is licked
@@ -31,6 +31,21 @@ const ChatWindow = ({ appId, roomId, user }) => {
   //   }
   //   setMessage("");
   // };
+
+  const toggleReactionDropdown = (messageId) => {
+    setActiveReactionDropdown(
+      activeReactionDropdown === messageId ? null : messageId
+    );
+  };
+  const handleReactToMessage = (messageId, emoji) => {
+    console.log("emoji", emoji);
+    socket.emit("react-to-message", {
+      messageId,
+      emoji,
+      user,
+      room: finalroom,
+    });
+  };
   useEffect(() => {
     console.log("1");
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
@@ -42,7 +57,6 @@ const ChatWindow = ({ appId, roomId, user }) => {
     console.log("2");
     socket.emit("join-room", finalroom);
     socket.on("messageHistory", (messages) => {
-     
       const formattedMessages = messages.map((msg) => ({
         ...msg,
         createdAt: msg.createdAt ? new Date(msg.createdAt) : null,
@@ -80,8 +94,6 @@ const ChatWindow = ({ appId, roomId, user }) => {
   //   });
   // }, [data]);
 
-  
-
   useEffect(() => {
     console.log("5");
     socket.on("receive-message", (newMessage) => {
@@ -113,10 +125,18 @@ const ChatWindow = ({ appId, roomId, user }) => {
       );
     });
 
+    socket.on("message-reaction", ({ messageId, reactions }) => {
+      setData((prevData) =>
+        prevData.map((msg) =>
+          msg._id === messageId ? { ...msg, reactions } : msg
+        )
+      );
+    });
     return () => {
       socket.off("receive-message");
       socket.off("message-edited");
       socket.off("message=deleted");
+      socket.off("message-reaction");
     };
   }, []);
 
@@ -201,13 +221,13 @@ const ChatWindow = ({ appId, roomId, user }) => {
     // Load the content of the message to the contentEditable div
     if (contentEditableRef.current) {
       contentEditableRef.current.innerHTML = currentContent;
-      moveCursorToEnd(contentEditableRef.current);  // Move cursor to the end of the content
+      moveCursorToEnd(contentEditableRef.current); // Move cursor to the end of the content
     }
- 
-    setEditingMessageId(messageId);  // Track the message being edited
+
+    setEditingMessageId(messageId); // Track the message being edited
     setActiveDropdown(null);
   };
- 
+
   const handleDelete = (messageId) => {
     //triggers when message delete button is clicked
     socket.emit("delete-message", { messageId, room: finalroom });
@@ -336,24 +356,24 @@ const ChatWindow = ({ appId, roomId, user }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
- 
+
     if (contentEditableRef.current) {
       const contentHtml = contentEditableRef.current.innerHTML.trim();
- 
+
       if (editingMessageId) {
         // Emit the edit message event
         socket.emit("edit-message", {
           messageId: editingMessageId,
           newContent: contentHtml,
-          room: finalroom
+          room: finalroom,
         });
-       
+
         // Reset editing state
         setEditingMessageId(null);
       } else {
         // Handle new message
         const messageData = { appId, message: contentHtml, finalroom, user };
- 
+
         if (images.length > 0) {
           const readers = images.map((img) => {
             const reader = new FileReader();
@@ -362,19 +382,22 @@ const ChatWindow = ({ appId, roomId, user }) => {
               reader.readAsDataURL(img);
             });
           });
- 
+
           Promise.all(readers).then((imageResults) => {
             socket.emit("message", { ...messageData, images: imageResults });
             setImages([]);
             setImagePreviews([]);
           });
-        } else if (contentHtml !== "" && contentHtml.replace(/<[^>]*>/g, "").trim() !== "") {
+        } else if (
+          contentHtml !== "" &&
+          contentHtml.replace(/<[^>]*>/g, "").trim() !== ""
+        ) {
           socket.emit("message", messageData);
         }
       }
- 
+
       // Clear the contentEditable div
-      contentEditableRef.current.innerHTML = "";  // Clear the div after sending/editing
+      contentEditableRef.current.innerHTML = ""; // Clear the div after sending/editing
     }
   };
 
@@ -568,7 +591,6 @@ const ChatWindow = ({ appId, roomId, user }) => {
       month: "long",
       day: "numeric",
     });
-    
   };
 
   const formatTime = (dateValue) => {
@@ -604,22 +626,36 @@ const ChatWindow = ({ appId, roomId, user }) => {
   const moveCursorToEnd = (element) => {
     const range = document.createRange();
     const selection = window.getSelection();
- 
+
     range.selectNodeContents(element);
     range.collapse(false); // Collapse the range to the end
     selection.removeAllRanges();
     selection.addRange(range);
-    element.focus();  // Ensure the contentEditable div gets focused
+    element.focus(); // Ensure the contentEditable div gets focused
   };
 
+  const checkdate = (a, b) => {
+    const date1 = new Date(a);
+    const date2 = new Date(b);
+    
+    if (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    ) {
+      
+      return true;
+    }
+    return false;
+  };
   return (
     // <div className="w-screen bg-accent h-100%">
     <div>
       {chatboxopen ? (
-        <div className="rounded-lg  h-screen w-auto p-[2%] shadow-md">
-          <div className="flex flex-row h-[5%] bg-primary rounded-t-lg py-[1%] shadow-md">
+        <div className="rounded-lg  h-screen w-auto p-[2%] ">
+          <div className="flex flex-row h-[5%] bg-primary rounded-t-lg py-[1%] ">
             <div className="w-[95%] h-[100%]"></div>
-            <button onClick={chatbox} className=" w-[10%] h-[100%]  shadow-md">
+            <button onClick={chatbox} className=" w-[10%] h-[100%] ">
               <img
                 src="https://www.svgrepo.com/show/80301/cross.svg"
                 alt="close icon"
@@ -627,8 +663,8 @@ const ChatWindow = ({ appId, roomId, user }) => {
               ></img>
             </button>
           </div>
-          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg shadow-md p-2">
-            <div className="flex   overflow-auto custom-scrollbar  ">
+          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg  p-2">
+            <div className="flex   overflow-auto custom-scrollbar h-[90%]  ">
               <div className="flex flex-col gap-3  w-[100%] pr-0">
                 {/* {data.map((msg, index) =>
                   msg.user === user ? (
@@ -700,72 +736,144 @@ const ChatWindow = ({ appId, roomId, user }) => {
                   <React.Fragment key={index}>
                     {shouldShowDateHeader(msg, data[index - 1]) && (
                       <div className="text-center my-2">
-                        <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded-full  text-[10px] text-text">
+                        <span className="bg-gray-200 text-time px-2 py-1 rounded-full text-[10px]">
                           {formatDate(msg.createdAt)}
                         </span>
                       </div>
                     )}
                     {msg.user === user ? (
-                      <div className="flex flex-col">
-                        <div className="text-[10px] text-gray-500 block ml-1 justify-end text-end mr-1 text-text2">
+                      <div className="flex flex-col mr-1">
+                        <div className="text-[9px] text-time block ml-1 justify-end text-end mr-1">
                           {formatTime(msg.createdAt)}
                         </div>
-                        <div
-                          key={index}
-                          className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1 mr-1 "
-                        >
-                          <p className="text-wrap m-2 word overflow-x-auto word text-text text-[12px]">
+                        <div className="message-container relative bg-sender flex flex-row self-end max-w-[80%] rounded-[4px] bg-chat2">
+                          <p className="mb-[2px] pl-1 pr-1 pb-1 text-black rounded-xl text-wrap word overflow-x-auto preserve-whitespace m-1 word text-msg text-[70%]">
                             {renderMessage(msg.message)}
                           </p>
-                          <button
-                            onClick={() => toggleDropdown(msg._id)}
-                            className="mr-[10px] text-xl text-sender hover:text-text "
-                          >
-                            ⋮
-                          </button>
-                          {activeDropdown === msg._id && (
-                            <div className=" absolute right-full top-0 bg-white border rounded shadow-lg z-10 text-xs  mr-[5px] my-1 border-text2">
+
+                          {/* Emoji Reaction and Three-dot button */}
+                      
+                          <div className="message-actions flex items-center gap-2 absolute right-0 top-[-30px] opacity-0 hover:opacity-100">
+                              {/* Emoji Reaction */}
+                              <div className="emoji-reaction">
+                                <div className="emoji-dropdown">
+                                  <button onClick={() => handleReactToMessage(msg._id, "😊")}>😊</button>
+                                  <button onClick={() => handleReactToMessage(msg._id, "👍")}>👍</button>
+                                  <button onClick={() => handleReactToMessage(msg._id, "❤️")}>❤️</button>
+                            
+
+                              {/* Edit Button */}
                               <button
-                                  onClick={() => {
-                                    handleEdit(msg._id, msg.message);  // Ensure `msg.message` is passed here for editing
-                                  }}
-                                  className="block py-[3px] text-black hover:bg-secondary rounded-[3px] w-14 text-text"
-                                >
-                                  Edit
-                                </button>
+                                onClick={() => handleEdit(msg._id, msg.message)}
+                                className="py-[3px] px-2  hover:bg-delete rounded-[3px] text-[10px]"
+                              >
+                                Edit
+                              </button>
+
+                              {/* Delete Button */}
                               <button
-                                onClick={() => {
-                                  handleDelete(msg._id);
-                                }}
-                                className="block  py-[3px] text-red-500 hover:bg-red rounded-[3px] w-14 text-text"
+                                onClick={() => handleDelete(msg._id)}
+                                className="py-[3px] px-2 text-red hover:bg-delete rounded-[3px] text-[10px]"
                               >
                                 Delete
                               </button>
+                              </div>
+                              </div>
                             </div>
-                          )}
                         </div>
+
+                        {/* Show reactions below the message */}
+                        {msg.reactions && msg.reactions.length > 0 && (
+                          <div className="reactions-container">
+                            {msg.reactions.map((reaction, index) => (
+                              <span key={index} className="reaction">
+                                {reaction.emoji}{" "}
+                                {reaction.user === user ? "You" : reaction.user}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div className="flex flex-row">
-                        <div className="bg-joinbutton rounded-full w-6 h-6 mr-1 mt-[15px] text-center text-[10px] font-bold flex items-center justify-center ">
-                          {name(msg.user)}
-                        </div>
-                        <div className="w-[80%]">
-                          <div className="text-[10px] text-text2 ">
-                            <span className="mr-1 ">{msg.user}</span>
-                            <span >{formatTime(msg.createdAt)}</span>
+                      <div className="flex flex-row ">
+                        {msg.user ===
+                          data[index - 1 > 0 ? index - 1 : 0].user &&
+                        index != 0 &&
+                        checkdate(
+                          msg.createdAt,
+                          data[index - 1 > 0 ? index - 1 : 0].createdAt
+                        ) ? (
+                          <div className=" rounded-full w-7 items-center justify-center h-7 mr-1 mt-3 text-center text-[12px] flex"></div>
+                        ) : (
+                          <div className="bg-text2 text-text rounded-full w-7 items-center justify-center h-7 mr-1 mt-3 text-center text-[12px] flex">
+                            {name(msg.user)}
                           </div>
+                        )}
 
-                          <div
-                            key={index}
-                            className="bg-receiver flex flex-col max-w-[100%]   rounded-[5px] w-fit  "
-                          >
-                            <div className="flex flex-col">
-                              <span className="  p-[3px] text-black rounded-xl text-wrap word overflow-x-auto word text-text text-[12px]">
-                                {renderMessage(msg.message)}
-                              </span>
+                        <div className="w-[80%]">
+                          {/* {
+                            msg.user ===
+                            data[index - 1 > 0 ? index - 1 : 0].user &&
+                            index != 0 ?(
+                              <div>f</div>
+                            ):(
+                              <div>s</div>
+                            )
+                          } */}
+                          <div className="text-[9px] text-time">
+                            <span className="mr-1">{msg.user}</span>
+                            <span>{formatTime(msg.createdAt)}</span>
+                          </div>
+                          <div className="message-container flex flex-col max-w-[80%] w-fit bg-receiver rounded-[4px]">
+                            <span className="mb-[2px] pl-1 pr-1 pb-1 text-black text-wrap word overflow-x-auto preserve-whitespace m-1 word text-msg text-[70%] ">
+                              {renderMessage(msg.message)}
+                            </span>
+
+                            {/* Emoji Reaction and Three-dot button */}
+                            <div className="message-actions left-0">
+                              {/* Emoji Reaction button */}
+
+                              <div className="emoji-reaction">
+                                <div className="emoji-dropdown">
+                                  <button
+                                    onClick={() =>
+                                      handleReactToMessage(msg._id, "😊")
+                                    }
+                                  >
+                                    😊
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleReactToMessage(msg._id, "👍")
+                                    }
+                                  >
+                                    👍
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleReactToMessage(msg._id, "❤️")
+                                    }
+                                  >
+                                    ❤️
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </div>
+
+                          {/* Show reactions below the message */}
+                          {msg.reactions && msg.reactions.length > 0 && (
+                            <div className="reactions-container1">
+                              {msg.reactions.map((reaction, index) => (
+                                <span key={index} className="reaction">
+                                  {reaction.emoji}{" "}
+                                  {reaction.user === user
+                                    ? "You"
+                                    : reaction.user}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -774,15 +882,18 @@ const ChatWindow = ({ appId, roomId, user }) => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="h-[10%]">
-              <div className="bg-background flex  flex-row   pt-3 h-[100%] rounded-b-lg items-center text-start justify-center  pb-0">
+            <form
+              onSubmit={handleSubmit}
+              className="h-[10%] flex flex-col items-center justify-center  text-[14px]"
+            >
+              <div className="bg-background flex  flex-row   h-[90%] w-[100%] rounded-b-lg items-center text-start justify-center  ">
                 <div className="bg-receiverhover  flex flex-row rounded-[10px] w-[100%] h-[100%]">
                   <input
                     type="file"
                     multiple
                     id="fileInput"
                     onChange={handleImageChange}
-                    className="hidden bg-receiverhover"
+                    className="hidden bg-receiverhover "
                   />
                   <div
                     ref={contentEditableRef}
@@ -792,14 +903,14 @@ const ChatWindow = ({ appId, roomId, user }) => {
                     onPaste={handlePaste}
                     onKeyDown={handleKeyDown}
                     onDragOver={handleDragOver}
-                    className="flex-grow bg-white  rounded-[10px]  px-2 overflow-y-auto custom-scrollbar  bg-receiverhover outline-none  "
+                    className="flex-grow bg-white  rounded-[10px]  px-2 overflow-y-auto custom-scrollbar  bg-receiverhover outline-none py-[10px] "
                     placeholder="Type your message..."
                     style={{
                       whiteSpace: "break-spaces",
                       overflowWrap: "break-word",
                       overflowY: "auto",
                       maxHeight: "100px",
-                      height:"100%",
+                      height: "100%",
                       width: "80%",
                       scrollbarWidth: "thin",
                       scrollbarColor: "#888 #f0f0f0",
