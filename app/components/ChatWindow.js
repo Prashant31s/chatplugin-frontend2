@@ -648,6 +648,49 @@ const ChatWindow = ({ appId, roomId, user }) => {
     }
     return false;
   };
+
+  const renderReactions = (reactions, isOwnMessage) => {
+    if (!reactions || reactions.length === 0) return null;
+ 
+    const groupedReactions = reactions.reduce((acc, reaction) => {
+      if (!acc[reaction.emoji]) {
+        acc[reaction.emoji] = { count: 0, users: [] };
+      }
+      acc[reaction.emoji].count++;
+      acc[reaction.emoji].users.push(reaction.user);
+      return acc;
+    }, {});
+ 
+    return (
+      <div className={`reactions-container flex flex-wrap  ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+        {Object.entries(groupedReactions).map(([emoji, { count, users }]) => (
+          <div key={emoji} className={`reaction-item relative group ${isOwnMessage ? 'text-right' : 'text-left'} m-0.5`}>
+            <div className="reaction bg-gray-100 rounded-lg border border-time cursor-default inline-flex items-center overflow-hidden">
+              <span className=" ">{emoji}</span>
+              <span className=" border-primary px-1 py-1 bg-gray-200">{count}</span>
+            </div>
+            <div
+              className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} bottom-full mb-2
+                        bg-white text-black text-xs rounded-md p-1 opacity-0 group-hover:opacity-100
+                        transition-opacity duration-200 pointer-events-none z-10
+                        shadow-[0_0_10px_rgba(0,0,0,0.1)] bg-background`}
+              style={{
+                boxShadow: isOwnMessage
+                  ? '-5px 0 10px rgba(0,0,0,0.1)'
+                  : '5px 0 10px rgba(0,0,0,0.1)'
+              }}
+            >
+              {users.map((username, index) => (
+                <div key={index} className="whitespace-nowrap  border-b border-gray-200 last:border-b-0">
+                  {username}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
   return (
     // <div className="w-screen bg-accent h-100%">
     <div>
@@ -663,75 +706,10 @@ const ChatWindow = ({ appId, roomId, user }) => {
               ></img>
             </button>
           </div>
-          <div className="flex flex-col justify-end  bg-black  bg-background  h-[95%] rounded-b-lg  p-2">
-            <div className="flex   overflow-auto custom-scrollbar h-[90%]  ">
+          <div className="flex flex-col justify-end  bg-background  h-[95%] rounded-b-lg  p-2 pr-0">
+            <div className="flex overflow-auto custom-scrollbar h-[90%]  ">
               <div className="flex flex-col gap-3  w-[100%] pr-0">
-                {/* {data.map((msg, index) =>
-                  msg.user === user ? (
-                    <div className="flex flex-col">
-                      <div className="text-[10px] text-gray-500 block ml-1 justify-end text-end mr-1">
-                        {formatTime(msg.createdAt)}
-                      </div>
-                      <div
-                        key={index}
-                        className="relative bg-sender flex flex-row self-end max-w-[80%]  rounded-[5px] p-1 mr-1 "
-                      >
-                        <p className="text-wrap m-2 word overflow-x-auto word">
-                          {renderMessage(msg.message)}
-                        </p>
-                        <button
-                          onClick={() => toggleDropdown(msg._id)}
-                          className="mr-[10px] text-xl"
-                        >
-                          ⋮
-                        </button>
-                        {activeDropdown === msg._id && (
-                          <div className=" absolute right-full top-0 bg-white border rounded shadow-lg z-10 text-xs  mr-[5px] my-1">
-                            <button
-                              onClick={() => {
-                                handleEdit(msg._id, msg.nmessages);
-                              }}
-                              className="block py-[3px] text-black hover:bg-secondary rounded-[3px] w-14"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => {
-                                handleDelete(msg._id);
-                              }}
-                              className="block  py-[3px] text-red-500 hover:bg-red rounded-[3px] w-14"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-row">
-                      <div className="flex bg-joinbutton rounded-full w-7 items-center justify-center h-7 mr-1 mt-3 text-center text-[12px]  font-bold">
-                        {name(msg.user)}
-                      </div>
-                      <div className="w-[80%]">
-                        <div className="text-[10px] ">
-                          <span className="mr-1">{msg.user}</span>
-                          <span>{formatTime(msg.createdAt)}</span>
-                        </div>
-
-                        <div
-                          key={index}
-                          className="bg-receiver flex flex-col max-w-[100%]   rounded-[5px] w-fit  "
-                        >
-                          <div className="flex flex-col">
-                            <span className=" mb-[2px] pl-1 pr-1 pb-1 text-black rounded-xl text-wrap word overflow-x-auto word ">
-                              {renderMessage(msg.message)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                )} */}
+         
                 {data.map((msg, index) => (
                   <React.Fragment key={index}>
                     {shouldShowDateHeader(msg, data[index - 1]) && (
@@ -805,7 +783,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
                         ) ? (
                           <div className=" rounded-full w-7 items-center justify-center h-7 mr-1 mt-3 text-center text-[12px] flex"></div>
                         ) : (
-                          <div className="bg-text2 text-text rounded-full w-7 items-center justify-center h-7 mr-1 mt-3 text-center text-[12px] flex">
+                          <div className="bg-user text-text rounded-full w-7 items-center justify-center h-7 mr-1 mt-3 text-center text-[12px] flex">
                             {name(msg.user)}
                           </div>
                         )}
@@ -827,8 +805,9 @@ const ChatWindow = ({ appId, roomId, user }) => {
                           <div className="message-container flex flex-col max-w-[80%] w-fit bg-receiver rounded-[4px]">
                             <span className="mb-[2px] pl-1 pr-1 pb-1 text-black text-wrap word overflow-x-auto preserve-whitespace m-1 word text-msg text-[70%] ">
                               {renderMessage(msg.message)}
+                              
                             </span>
-
+                            {renderReactions(msg.reactions, msg.user === user)}
                             {/* Emoji Reaction and Three-dot button */}
                             <div className="message-actions left-0">
                               {/* Emoji Reaction button */}
@@ -859,10 +838,11 @@ const ChatWindow = ({ appId, roomId, user }) => {
                                 </div>
                               </div>
                             </div>
+                            
                           </div>
 
                           {/* Show reactions below the message */}
-                          {msg.reactions && msg.reactions.length > 0 && (
+                          {/* {msg.reactions && msg.reactions.length > 0 && (
                             <div className="reactions-container1">
                               {msg.reactions.map((reaction, index) => (
                                 <span key={index} className="reaction">
@@ -873,7 +853,7 @@ const ChatWindow = ({ appId, roomId, user }) => {
                                 </span>
                               ))}
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     )}
