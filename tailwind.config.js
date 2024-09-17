@@ -25,6 +25,7 @@ module.exports = {
     'receiverhover':'#ececec',
     'delete':"#ececec",
     'red':"#FF0000",
+    'user':"#7e81b6"
      },
     extend: {},
   },
